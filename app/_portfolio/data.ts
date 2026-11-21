@@ -11,7 +11,7 @@ export const chainInfo: Record<
   Chain,
   { image: string; label: string; description: string }
 > = {
-  Solana: { image: "/chains/solana.jpg", label: "SOL", description: "Explore your Solana assets" },
+  Solana: { image: "/chains/solana.png", label: "SOL", description: "Explore your Solana assets" },
   EVM: { image: "/chains/ethereum.png", label: "EVM", description: "Explore Ethereum and EVM assets" },
   Sui: { image: "/chains/sui.png", label: "SUI", description: "Explore your Sui assets" },
 };

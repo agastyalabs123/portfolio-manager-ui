@@ -20,13 +20,11 @@ import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Table, proportional, useTableSortable, useTableSortableState } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartBarIcon, EyeIcon, Square2StackIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import {
   chainInfo,
   chainTotals,
   chains,
-  compactMoney,
   filters,
   holdings,
   money,
@@ -55,66 +53,38 @@ function Change({ value, children }: { value: number; children?: React.ReactNode
   );
 }
 
-function PerformanceChart({ period, filter, total, isHidden }: { period: Period; filter: Filter; total: number; isHidden: boolean }) {
+function PerformanceChart({ period, filter }: { period: Period; filter: Filter }) {
   const { points, ticks } = periodData[period];
-  const last = points[points.length - 1];
-  const data = points.map((point, index) => {
-    const wobble =
-      filter === "Solana" ? Math.sin(index * 1.2) * 2 : filter === "EVM" ? Math.cos(index * 0.9) * 3 : filter === "Sui" ? Math.sin(index * 1.5) * 4 : 0;
-    return { index, value: ((point + wobble) / last) * total };
-  });
-  const tickIndexes = [0, 8, 15, 23];
+  const values = points.map((point, index) =>
+    point + (filter === "Solana" ? Math.sin(index * 1.2) * 2 : filter === "EVM" ? Math.cos(index * 0.9) * 3 : filter === "Sui" ? Math.sin(index * 1.5) * 4 : 0),
+  );
+  const low = Math.min(...values) - 4;
+  const high = Math.max(...values) + 4;
+  const coordinates = values.map((value, index) => ({
+    x: 8 + (index / (values.length - 1)) * 684,
+    y: 170 - ((value - low) / (high - low)) * 150,
+  }));
+  const line = coordinates.map((point, index) => `${index === 0 ? "M" : "L"}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
+  const last = coordinates[coordinates.length - 1];
 
   return (
-    <ResponsiveContainer width="100%" height={240}>
-      <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} accessibilityLayer>
+    <VStack gap={2}>
+      <svg width="100%" height="200" viewBox="0 0 700 190" preserveAspectRatio="none" role="img" aria-label={`${filter} sample portfolio performance for ${period}, trending upward`}>
         <defs>
           <linearGradient id="orbitGrowth" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.35} />
-            <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
           </linearGradient>
         </defs>
-        <CartesianGrid vertical={false} stroke="var(--color-border)" strokeDasharray="3 4" />
-        <XAxis
-          dataKey="index"
-          type="number"
-          domain={[0, 23]}
-          ticks={tickIndexes}
-          tickFormatter={(v: number) => ticks[tickIndexes.indexOf(v)] ?? ""}
-          tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
-          axisLine={false}
-          tickLine={false}
-        />
-        <YAxis
-          tickFormatter={(v: number) => (isHidden ? "••••" : compactMoney(v))}
-          tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
-          axisLine={false}
-          tickLine={false}
-          width={64}
-          domain={["dataMin", "dataMax"]}
-        />
-        <Tooltip
-          cursor={{ stroke: "var(--color-border)" }}
-          content={({ active, payload }) =>
-            active && payload?.length ? (
-              <Card padding={2}>
-                <Text type="supporting" hasTabularNumbers>
-                  {isHidden ? "••••••" : money(Number(payload[0].value))}
-                </Text>
-              </Card>
-            ) : null
-          }
-        />
-        <Area
-          type="monotone"
-          dataKey="value"
-          stroke="var(--color-accent)"
-          strokeWidth={2}
-          fill="url(#orbitGrowth)"
-          isAnimationActive={false}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+        {[30, 75, 120, 165].map((y) => <line key={y} x1="0" x2="700" y1={y} y2={y} stroke="var(--color-border)" strokeDasharray="4 6" />)}
+        <path d={`${line} L692 180 L8 180 Z`} fill="url(#orbitGrowth)" />
+        <path d={line} fill="none" stroke="var(--color-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        <circle cx={last.x} cy={last.y} r="5" fill="var(--color-accent)" stroke="var(--color-background-card)" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <HStack hAlign="between">
+        {ticks.map((tick, index) => <Text key={index} type="supporting" color="secondary">{tick || " "}</Text>)}
+      </HStack>
+    </VStack>
   );
 }
 
@@ -342,7 +312,7 @@ export function Dashboard({
                     ))}
                   </SegmentedControl>
                 </HStack>
-                <PerformanceChart period={period} filter={filter} total={visibleTotal} isHidden={isHidden} />
+                <PerformanceChart period={period} filter={filter} />
               </VStack>
             </Card>
           </GridSpan>
