@@ -4,6 +4,7 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Grid } from "@astryxdesign/core/Grid";
 import { ClickableCard } from "@astryxdesign/core/ClickableCard";
+import { Avatar } from "@astryxdesign/core/Avatar";
 import { Icon } from "@astryxdesign/core/Icon";
 import { chainInfo, chains, type Chain } from "./data";
 
@@ -11,9 +12,9 @@ export function ChainPicker({ onPick }: { onPick: (chain: Chain) => void }) {
   return (
     <VStack minHeight="100dvh" padding={8} hAlign="center">
       <VStack maxWidth={1120} width="100%" minHeight="100%" gap={10} vAlign="between">
-        <Heading level={2} accessibilityLevel={2} weight="bold">
+        <Text type="display-3" weight="bold">
           orbit.
-        </Heading>
+        </Text>
 
         <VStack gap={8}>
           <VStack gap={3} hAlign="center">
@@ -38,13 +39,10 @@ export function ChainPicker({ onPick }: { onPick: (chain: Chain) => void }) {
                   onClick={() => onPick(chain)}
                   padding={6}
                   elevation="low"
-                  minHeight={220}
                 >
                   <VStack gap={10} height="100%" vAlign="between">
                     <HStack hAlign="between" vAlign="start">
-                      <Text type="display-2" color="accent">
-                        {info.mark}
-                      </Text>
+                      <Avatar src={info.image} name={chain} alt={`${chain} logo`} size={72} tooltip={false} />
                       <Icon icon="chevronRight" color="secondary" />
                     </HStack>
                     <VStack gap={1}>

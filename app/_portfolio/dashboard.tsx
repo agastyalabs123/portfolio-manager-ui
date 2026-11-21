@@ -8,7 +8,7 @@ import { TopNav } from "@astryxdesign/core/TopNav";
 import { VStack, HStack, StackItem } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { ClickableCard } from "@astryxdesign/core/ClickableCard";
+import { SelectableCard } from "@astryxdesign/core/SelectableCard";
 import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Button } from "@astryxdesign/core/Button";
@@ -143,7 +143,7 @@ export function Dashboard({
     data: filtered,
     defaultSort: [{ sortKey: "value", direction: "descending" }],
   });
-  const sortPlugin = useTableSortable(sortConfig);
+  const sortPlugin = useTableSortable<Holding>(sortConfig);
 
   const show = (value: number) => (isHidden ? "••••••" : money(value));
   const current = periodData[period];
@@ -156,7 +156,12 @@ export function Dashboard({
       sortable: true,
       renderCell: (row) => (
         <HStack gap={3} vAlign="center">
-          <Avatar name={row.symbol} size="md" tooltip={false} />
+          <Avatar
+            name={row.symbol}
+            src={row.symbol === "SOL" ? chainInfo.Solana.image : row.symbol === "ETH" ? chainInfo.EVM.image : row.symbol === "SUI" ? chainInfo.Sui.image : undefined}
+            size="md"
+            tooltip={false}
+          />
           <VStack gap={0}>
             <Text weight="semibold">{row.name}</Text>
             <Text type="supporting" color="secondary">
@@ -173,7 +178,7 @@ export function Dashboard({
       sortable: true,
       renderCell: (row) => (
         <HStack gap={2} vAlign="center">
-          <Text color="accent">{chainInfo[row.chain].mark}</Text>
+          <Avatar src={chainInfo[row.chain].image} name={row.chain} alt={`${row.chain} logo`} size="sm" tooltip={false} />
           <Text>{row.chain}</Text>
         </HStack>
       ),
@@ -274,12 +279,12 @@ export function Dashboard({
     >
       <VStack gap={8} maxWidth={1600}>
         {/* Page header */}
-        <HStack id="overview" hAlign="between" vAlign="end" gap={4} wrap="wrap">
+        <HStack hAlign="between" vAlign="end" gap={4} wrap="wrap">
           <VStack gap={1}>
             <Text type="label" color="accent">
               YOUR DASHBOARD
             </Text>
-            <Heading level={1}>Portfolio overview</Heading>
+            <Heading level={1} id="overview">Portfolio overview</Heading>
             <Text color="secondary">All your assets, across every chain, in one clear view.</Text>
           </VStack>
           <Button
@@ -303,7 +308,7 @@ export function Dashboard({
                 <Text type="label" color="secondary">
                   TOTAL PORTFOLIO VALUE
                 </Text>
-                <Text type="display-1" weight="bold" hasTabularNumbers>
+                <Text type="body" size="4xl" weight="bold" hasTabularNumbers>
                   {show(visibleTotal)}
                 </Text>
                 <Change value={current.change}>
@@ -344,13 +349,13 @@ export function Dashboard({
         </Grid>
 
         {/* Networks */}
-        <VStack id="networks" gap={4}>
+        <VStack gap={4}>
           <HStack hAlign="between" vAlign="end">
             <VStack gap={1}>
               <Text type="label" color="accent">
                 THE BIG PICTURE
               </Text>
-              <Heading level={2}>Across your networks</Heading>
+              <Heading level={2} id="networks">Across your networks</Heading>
             </VStack>
             <Text type="supporting" color="secondary">
               3 networks in demo
@@ -361,23 +366,21 @@ export function Dashboard({
               const share = (chainTotals[chain] / portfolioTotal) * 100;
               const isSelected = filter === chain;
               return (
-                <ClickableCard
+                <SelectableCard
                   key={chain}
-                  label={isSelected ? `Show all chains` : `Filter to ${chain}`}
-                  onClick={() => onFilterChange(isSelected ? "All chains" : chain)}
-                  variant={isSelected ? chainInfo[chain].color : "default"}
+                  label={`${chain} network`}
+                  isSelected={isSelected}
+                  onChange={(selected) => onFilterChange(selected ? chain : "All chains")}
                   padding={5}
                 >
                   <VStack gap={4}>
                     <HStack hAlign="between" vAlign="center">
-                      <Text type="display-3" color="accent">
-                        {chainInfo[chain].mark}
-                      </Text>
+                      <Avatar src={chainInfo[chain].image} name={chain} alt={`${chain} logo`} size="lg" tooltip={false} />
                       <Icon icon="chevronRight" color="secondary" />
                     </HStack>
                     <VStack gap={1}>
                       <Text color="secondary">{chain}</Text>
-                      <Text type="display-3" weight="bold" hasTabularNumbers>
+                      <Text type="body" size="2xl" weight="bold" hasTabularNumbers>
                         {show(chainTotals[chain])}
                       </Text>
                     </VStack>
@@ -391,20 +394,20 @@ export function Dashboard({
                     </HStack>
                     <ProgressBar label={`${chain} share of portfolio`} isLabelHidden value={share} />
                   </VStack>
-                </ClickableCard>
+                </SelectableCard>
               );
             })}
           </Grid>
         </VStack>
 
         {/* Assets */}
-        <VStack id="assets" gap={4}>
+        <VStack gap={4}>
           <HStack hAlign="between" vAlign="end">
             <VStack gap={1}>
               <Text type="label" color="accent">
                 YOUR HOLDINGS
               </Text>
-              <Heading level={2}>Assets</Heading>
+              <Heading level={2} id="assets">Assets</Heading>
             </VStack>
             <Text type="supporting" color="secondary">
               {filtered.length} of {holdings.length} assets

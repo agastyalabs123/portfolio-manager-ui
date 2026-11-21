@@ -6,14 +6,14 @@ export const chains: Chain[] = ["Solana", "EVM", "Sui"];
 export const filters: Filter[] = ["All chains", ...chains];
 export const periods: Period[] = ["24H", "7D", "30D", "90D", "1Y"];
 
-/** Astryx colour variant per chain, shared by cards, icons and chart. */
+/** Chain labels and local logo assets used throughout the portfolio. */
 export const chainInfo: Record<
   Chain,
-  { mark: string; label: string; description: string; color: "purple" | "blue" | "cyan" }
+  { image: string; label: string; description: string }
 > = {
-  Solana: { mark: "◎", label: "SOL", description: "Explore your Solana assets", color: "purple" },
-  EVM: { mark: "◆", label: "EVM", description: "Explore Ethereum and EVM assets", color: "blue" },
-  Sui: { mark: "◈", label: "SUI", description: "Explore your Sui assets", color: "cyan" },
+  Solana: { image: "/chains/solana.jpg", label: "SOL", description: "Explore your Solana assets" },
+  EVM: { image: "/chains/ethereum.png", label: "EVM", description: "Explore Ethereum and EVM assets" },
+  Sui: { image: "/chains/sui.png", label: "SUI", description: "Explore your Sui assets" },
 };
 
 export interface Holding extends Record<string, unknown> {
